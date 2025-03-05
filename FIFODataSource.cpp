@@ -21,7 +21,9 @@ FIFODataSource::~FIFODataSource() {
 
 void FIFODataSource::start() {
     m_running = true;
-    QtConcurrent::run([this]() { readLoop(); });
+   // QtConcurrent::run([this]() { readLoop(); });
+    QThreadPool::globalInstance()->start([this]() { readLoop(); });
+
 }
 
 void FIFODataSource::stop() {
