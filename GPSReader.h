@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QByteArray>
 #include <QSerialPort>
+#include "NMEAParser.h"
 
 // Struttura per rappresentare le coordinate GPS
 struct Coordinate {
@@ -18,19 +19,17 @@ public:
     explicit GPSReader(const QString &portName, int baudRate = 9600, QObject *parent = nullptr);
     ~GPSReader();
 
-    void start();  // Avvia la lettura (tramite readyRead)
+    void start();  // Avvia la lettura
     void stop();   // Ferma la lettura, chiude la porta
 
 signals:
-    // Emesso quando viene riconosciuta una frase GPRMC valida (esempio)
     void newCoordinate(const Coordinate &coord);
-    // Emesso per ogni frase NMEA letta (una per riga) insieme al Block ID
     void rawDataReceived(const QString &rawNmea, int blockId);
-    // Emesso per comunicare lo stato (es. "Lock acquisito", "Porta riavviata", ecc.)
     void statusUpdated(const QString &status);
+    // Il segnale parsedDataReceived non verrà usato automaticamente per aggiornare la GUI
+    void parsedDataReceived(const NMEAParser::ParsedData &parsedData);
 
 public slots:
-    // Slot per controlli
     void pauseReception();
     void resumeReception();
     void restartPort();
@@ -40,12 +39,11 @@ private slots:
 
 private:
     bool tryOpenPort(const QString &portName);
-    void parseNMEA(const QByteArray &line); // Esempio base per GPRMC
 
     QSerialPort *m_serial;
-    QByteArray m_buffer; // Buffer per accumulare i dati parziali
-    bool m_paused;       // Indica se la ricezione è in pausa
-    int m_blockCounter;  // Contatore di blocco: ogni chiamata a readData() incrementa questo valore
+    QByteArray m_buffer;
+    bool m_paused;
+    int m_blockCounter;
 };
 
 #endif // GPSREADER_H

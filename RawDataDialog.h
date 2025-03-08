@@ -2,17 +2,13 @@
 #define RAWDATADIALOG_H
 
 #include <QDialog>
-#include "GPSReader.h"  // Per la definizione di Coordinate
+#include "GPSReader.h"    // Per la definizione di Coordinate
+#include "NMEAParser.h"   // Per ParsedData
 
 class QTableWidget;
 class QTextEdit;
 class QLabel;
 class QPushButton;
-
-struct NmeaSentenceInfo {
-    QMap<int, QString> descriptions;  // Mappa: indice -> descrizione del campo
-    int minFields;                    // Numero minimo di campi attesi per la frase
-};
 
 class RawDataDialog : public QDialog {
     Q_OBJECT
@@ -20,21 +16,19 @@ public:
     explicit RawDataDialog(QWidget *parent = nullptr);
 
 public slots:
-    // Aggiunge una riga nella tabella dei dati grezzi, includendo il Block ID
     void addRawLogEntry(int blockId, const QString &timestamp, const QString &rawNMEA, const QString &sentenceType);
-    // Aggiorna l'area dei dati elaborati (coordinate)
     void updateProcessedData(const Coordinate &coord);
-    // Aggiorna l'area dello stato
     void updateStatus(const QString &status);
+    // Lo slot updateParsedData non viene chiamato automaticamente;
+    // il dettaglio verrà aggiornato quando l'utente clicca su una riga.
+    void updateParsedData(const NMEAParser::ParsedData &parsedData);
 
 signals:
-    // Segnali per i controlli, da collegare al GPSReader
     void pauseRequested();
     void resumeRequested();
     void restartRequested();
 
 private slots:
-    // Slot chiamato quando viene selezionata una riga nella tabella dei dati grezzi
     void onRawTableRowSelected(int currentRow, int currentColumn, int previousRow, int previousColumn);
 
 private:

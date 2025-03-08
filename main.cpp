@@ -9,8 +9,7 @@
 #include "SocketChannel.h"
 #include <QDebug>
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     QCommandLineParser parser;
@@ -48,6 +47,8 @@ int main(int argc, char *argv[])
         GPSReader *reader = new GPSReader(config.port, config.baudRate);
         QObject::connect(reader, &GPSReader::newCoordinate,
                          &displayDialog, &RawDataDialog::updateProcessedData);
+        QObject::connect(reader, &GPSReader::statusUpdated,
+                         &displayDialog, &RawDataDialog::updateStatus);
         QObject::connect(reader, &GPSReader::rawDataReceived,
                          [&displayDialog](const QString &rawData, int blockId) {
                              QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
@@ -59,8 +60,7 @@ int main(int argc, char *argv[])
                              }
                              displayDialog.addRawLogEntry(blockId, timestamp, rawData, sentenceType);
                          });
-        QObject::connect(reader, &GPSReader::statusUpdated,
-                         &displayDialog, &RawDataDialog::updateStatus);
+        // Non colleghiamo automaticamente parsedDataReceived per evitare di sovrascrivere il dettaglio
         QObject::connect(&displayDialog, &RawDataDialog::pauseRequested,
                          reader, &GPSReader::pauseReception);
         QObject::connect(&displayDialog, &RawDataDialog::resumeRequested,
