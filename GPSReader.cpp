@@ -35,7 +35,7 @@ bool GPSReader::tryOpenPort(const QString &portName) {
 }
 
 void GPSReader::start() {
-    // La lettura è gestita tramite readyRead
+    // Reading is triggered by QSerialPort::readyRead signal.
 }
 
 void GPSReader::stop() {

@@ -3,7 +3,11 @@
 
 #include "INMEASentenceParser.h"
 #include <QStringList>
-
+/**
+ * @brief A generic parser for NMEA sentences not specifically implemented.
+ *
+ * It simply splits the sentence into tokens and assigns each token a key "fieldN".
+ */
 class GenericFallbackParser : public INMEASentenceParser {
 public:
     virtual QString sentenceType() const override { return "Generic"; }

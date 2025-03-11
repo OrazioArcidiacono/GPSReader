@@ -57,3 +57,6 @@ HEADERS += GPSReceiverConfig.h \
            GPSHandlerFactory.h \
            SocketChannel.h \
            CommunicationChannel.h
+
+DISTFILES += \
+    GPSReader Project Documentation.docx

@@ -44,7 +44,7 @@ ReceiverConfig GPSReceiverConfig::loadConfig(const QString &dbPath, const QStrin
 
     // (Opzionale) Stampa la struttura della tabella ReceiverConfig
     QSqlQuery pragmaQuery(db);
-    if (pragmaQuery.exec("PRAGMA table_info(ReceiverConfig)")) {
+    if (pragmaQuery.exec("PRAGMA table_info(ReceiverConfig)")) { // dettagli sullo schema del DQ (SQLite)
         qDebug() << Q_FUNC_INFO << "Struttura della tabella 'ReceiverConfig':";
         while (pragmaQuery.next()) {
             qDebug() << Q_FUNC_INFO

@@ -12,7 +12,11 @@
 #include "HDTParser.h"
 #include "GenericFallbackParser.h"
 #include <QStringList>
-
+/**
+ * @brief Helper function that creates a parser instance based on the sentence type.
+ * @param type The type of the sentence (e.g., "GPRMC").
+ * @return A pointer to an instance of a specific INMEASentenceParser.
+ */
 static INMEASentenceParser* createParser(const QString &type) {
     if (type == "GPRMC") {
         return new GPRMCParser();

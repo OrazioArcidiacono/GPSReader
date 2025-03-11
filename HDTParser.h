@@ -2,7 +2,11 @@
 #define HDTPARSER_H
 
 #include "GenericNMEASentenceParser.h"
-
+/**
+ * @brief Parser for the HDT NMEA sentence.
+ *
+ * Parses the true heading.
+ */
 class HDTParser : public GenericNMEASentenceParser<HDTParser> {
 public:
     virtual QString sentenceType() const override { return "HDT"; }

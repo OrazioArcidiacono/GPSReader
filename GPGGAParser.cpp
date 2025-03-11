@@ -5,6 +5,7 @@ bool GPGGAParser::parseTokens(const QStringList &tokens) {
         m_errorMessage = "Incomplete GPGGA sentence: " + QString::number(tokens.size()) + " tokens found.";
         return false;
     }
+     // Save descriptive tokens
     m_fields.insert("sentenceID", tokens[0]);         // "$GPGGA"
     m_fields.insert("utcTime", tokens[1]);              // hhmmss.ss
     m_fields.insert("rawLatitude", tokens[2]);          // ddmm.mmmm

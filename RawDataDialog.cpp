@@ -14,10 +14,11 @@ RawDataDialog::RawDataDialog(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle("GPS Data Viewer");
-
+    // Setup legend label.
     m_legendLabel = new QLabel(this);
     m_legendLabel->setWordWrap(true);
     setupLegend();
+    // Setup raw data table.
 
     m_rawTable = new QTableWidget(this);
     m_rawTable->setColumnCount(4);
@@ -25,26 +26,30 @@ RawDataDialog::RawDataDialog(QWidget *parent)
     m_rawTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     m_rawTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_rawTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    // Setup fields (details) table.
 
     m_fieldsTable = new QTableWidget(this);
     m_fieldsTable->setColumnCount(3);
     m_fieldsTable->setHorizontalHeaderLabels(QStringList() << "Key" << "Value" << "Description");
     m_fieldsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-
+// Connect row selection to update detailed view.
     connect(m_rawTable, &QTableWidget::currentCellChanged,
             this, &RawDataDialog::onRawTableRowSelected);
 
     QSplitter *tablesSplitter = new QSplitter(Qt::Horizontal, this);
     tablesSplitter->addWidget(m_rawTable);
     tablesSplitter->addWidget(m_fieldsTable);
+    // Setup processed data area.
 
     m_processedTextEdit = new QTextEdit(this);
     m_processedTextEdit->setReadOnly(true);
     m_processedTextEdit->setPlaceholderText("Dati elaborati (coordinate)...");
+    // Setup status area.
 
     m_statusTextEdit = new QTextEdit(this);
     m_statusTextEdit->setReadOnly(true);
     m_statusTextEdit->setPlaceholderText("Stato...");
+    // Setup control buttons.
 
     m_pauseButton = new QPushButton("Pausa", this);
     m_resumeButton = new QPushButton("Riprendi", this);
@@ -97,7 +102,7 @@ void RawDataDialog::setupLegend() {
 }
 
 void RawDataDialog::setupControls() {
-    connect(m_pauseButton, &QPushButton::clicked, this, [this]() { emit pauseRequested(); });
+    connect(m_pauseButton, &QPushButton::clicked, this, [this]() { emit pauseRequested(); }); //signal-slot con lambda
     connect(m_resumeButton, &QPushButton::clicked, this, [this]() { emit resumeRequested(); });
     connect(m_restartButton, &QPushButton::clicked, this, [this]() { emit restartRequested(); });
 }
@@ -158,7 +163,7 @@ void RawDataDialog::onRawTableRowSelected(int currentRow, int currentColumn, int
         m_fieldsTable->insertRow(row);
         m_fieldsTable->setItem(row, 0, new QTableWidgetItem(i.key()));
         m_fieldsTable->setItem(row, 1, new QTableWidgetItem(i.value().toString()));
-        m_fieldsTable->setItem(row, 2, new QTableWidgetItem("")); // Qui puoi eventualmente inserire una descrizione aggiuntiva
+        m_fieldsTable->setItem(row, 2, new QTableWidgetItem(""));
     }
 
     // Se ci sono errori nel parsing, li segnala nello status
