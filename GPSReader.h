@@ -95,6 +95,8 @@ private:
     QByteArray m_buffer;    ///< Buffer to accumulate raw data.
     bool m_paused;          ///< Flag indicating whether reception is paused.
     int m_blockCounter;     ///< Counter for received data blocks.
+    Coordinate m_lastCoordinate; ///< Stored coordinate
+
 };
 
 #endif // GPSREADER_H

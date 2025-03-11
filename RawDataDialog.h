@@ -80,6 +80,9 @@ private:
     QPushButton *m_pauseButton;      ///< Pause button.
     QPushButton *m_resumeButton;     ///< Resume button.
     QPushButton *m_restartButton;    ///< Restart port button.
+
+    bool m_autoScrollEnabled;      // Flag to indicate if auto-scrolling is enabled
+    QTimer *m_autoScrollTimer;     // Timer per ripristinare l'auto-scroll dopo 10 secondi
 };
 
 #endif // RAWDATADIALOG_H

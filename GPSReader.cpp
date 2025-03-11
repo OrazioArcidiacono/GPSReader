@@ -8,6 +8,7 @@ GPSReader::GPSReader(const QString &portName, int baudRate, QObject *parent)
     , m_serial(new QSerialPort(this))
     , m_paused(false)
     , m_blockCounter(0)
+    , m_lastCoordinate({ 0.0, 0.0 })
 {
     m_serial->setPortName(portName);
     m_serial->setBaudRate(baudRate);
@@ -95,15 +96,28 @@ void GPSReader::readData() {
             NMEAParser::ParsedData parsed = NMEAParser::parse(rawSentence);
             emit parsedDataReceived(parsed);
 
-            if (parsed.valid && parsed.sentenceType == "GPRMC") {
+            // Controlla se la frase contiene coordinate (es. GPRMC, GPGGA o GPGLL)
+            if (parsed.valid &&
+                (parsed.sentenceType == "GPRMC" ||
+                 parsed.sentenceType == "GPGGA" ||
+                 parsed.sentenceType == "GPGLL")) {
                 if (parsed.fields.contains("latitude") && parsed.fields.contains("longitude")) {
-                    Coordinate coord { parsed.fields.value("latitude").toDouble(),
-                                     parsed.fields.value("longitude").toDouble() };
-                    emit newCoordinate(coord);
+                    double newLat = parsed.fields.value("latitude").toDouble();
+                    double newLon = parsed.fields.value("longitude").toDouble();
+                    Coordinate newCoord { newLat, newLon };
+
+                    // Verifica se le coordinate sono diverse dall'ultimo valore emesso
+                    // (definiamo una tolleranza per evitare aggiornamenti troppo frequenti)
+                    const double tolerance = 1e-6;
+                    if (fabs(newCoord.latitude - m_lastCoordinate.latitude) > tolerance ||
+                        fabs(newCoord.longitude - m_lastCoordinate.longitude) > tolerance) {
+                        m_lastCoordinate = newCoord;
+                        emit newCoordinate(newCoord);
+                    }
                 }
             }
         } else {
-            qDebug() << "Riga non NMEA:" << line;
+            qDebug() << "Non-NMEA line:" << line;
         }
     }
 }

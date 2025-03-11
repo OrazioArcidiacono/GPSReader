@@ -9,6 +9,8 @@
 #include <QPushButton>
 #include <QDateTime>
 #include <QDebug>
+#include <QTimer>
+#include <QScrollBar>
 
 RawDataDialog::RawDataDialog(QWidget *parent)
     : QDialog(parent)
@@ -27,6 +29,26 @@ RawDataDialog::RawDataDialog(QWidget *parent)
     m_rawTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_rawTable->setSelectionMode(QAbstractItemView::SingleSelection);
     // Setup fields (details) table.
+
+    m_autoScrollEnabled = true;
+    m_autoScrollTimer = new QTimer(this);
+    m_autoScrollTimer->setSingleShot(true);
+    m_autoScrollTimer->setInterval(10000); // 10 secondi
+    connect(m_autoScrollTimer, &QTimer::timeout, this, [this]() {
+        m_autoScrollEnabled = true;
+        m_rawTable->scrollToBottom();
+    });
+
+    connect(m_rawTable->verticalScrollBar(), &QScrollBar::valueChanged, this, [this](int value) {
+        if (value != m_rawTable->verticalScrollBar()->maximum()) {
+            // L'utente ha spostato la scrollbar manualmente:
+            m_autoScrollEnabled = false;
+            m_autoScrollTimer->start();  // Riavvia il timer per 10 secondi.
+        } else {
+            // Se l'utente arriva in fondo, auto-scroll si riabilita immediatamente.
+            m_autoScrollEnabled = true;
+        }
+    });
 
     m_fieldsTable = new QTableWidget(this);
     m_fieldsTable->setColumnCount(3);
@@ -119,6 +141,10 @@ void RawDataDialog::addRawLogEntry(int blockId, const QString &timestamp, const 
     displayStr.remove('\n');
     m_rawTable->setItem(row, 2, new QTableWidgetItem(displayStr));
     m_rawTable->setItem(row, 3, new QTableWidgetItem(sentenceType));
+
+    // Se l'auto-scroll è abilitato, scorri automaticamente in fondo.
+    if (m_autoScrollEnabled)
+        m_rawTable->scrollToBottom();
 }
 
 void RawDataDialog::updateProcessedData(const Coordinate &coord) {
