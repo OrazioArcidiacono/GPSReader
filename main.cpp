@@ -7,6 +7,8 @@
 #include "FIFODataSource.h"
 #include "FIFOWriter.h"
 #include "SocketChannel.h"
+#include "ParserWorker.h"
+#include <QThread>
 #include <QDebug>
 
 int main(int argc, char *argv[]) {
@@ -44,11 +46,10 @@ int main(int argc, char *argv[]) {
     RawDataDialog displayDialog;
 
     if (config.mode.toLower() == "standalone") {
+        // Create the GPSReader (Producer)
         GPSReader *reader = new GPSReader(config.port, config.baudRate);
-        QObject::connect(reader, &GPSReader::newCoordinate,
-                         &displayDialog, &RawDataDialog::updateProcessedData);
-        QObject::connect(reader, &GPSReader::statusUpdated,
-                         &displayDialog, &RawDataDialog::updateStatus);
+
+        // Connect rawDataReceived to update the raw data log in the GUI.
         QObject::connect(reader, &GPSReader::rawDataReceived,
                          [&displayDialog](const QString &rawData, int blockId) {
                              QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
@@ -60,14 +61,41 @@ int main(int argc, char *argv[]) {
                              }
                              displayDialog.addRawLogEntry(blockId, timestamp, rawData, sentenceType);
                          });
-        // Non colleghiamo automaticamente parsedDataReceived per evitare di sovrascrivere il dettaglio
+        QObject::connect(reader, &GPSReader::statusUpdated,
+                         &displayDialog, &RawDataDialog::updateStatus);
+
+        // Connect GUI control signals to GPSReader.
         QObject::connect(&displayDialog, &RawDataDialog::pauseRequested,
                          reader, &GPSReader::pauseReception);
         QObject::connect(&displayDialog, &RawDataDialog::resumeRequested,
                          reader, &GPSReader::resumeReception);
         QObject::connect(&displayDialog, &RawDataDialog::restartRequested,
                          reader, &GPSReader::restartPort);
+
+        // Create and start the ParserWorker (Consumer) in a separate thread.
+        QThread *workerThread = new QThread;
+        ParserWorker *worker = new ParserWorker(reader->sentenceQueue());
+        worker->moveToThread(workerThread);
+        QObject::connect(workerThread, &QThread::started, worker, &ParserWorker::process);
+        QObject::connect(worker, &ParserWorker::parsedDataAvailable,
+                         &displayDialog, &RawDataDialog::updateParsedData);
+        // Connect newCoordinate signal with two parameters to the GUI slot.
+        QObject::connect(worker, &ParserWorker::newCoordinate,
+                         &displayDialog, &RawDataDialog::updateProcessedData);
+
+        workerThread->start();
         reader->start();
+
+        int ret = app.exec();
+
+        // Cleanup before exit.
+        worker->stop();
+        workerThread->quit();
+        workerThread->wait();
+        delete worker;
+        delete workerThread;
+        delete reader;
+        return ret;
     }
     else if (config.mode.toLower() == "plugin") {
         if (config.pluginAction.toLower() == "fifo_write") {
@@ -88,7 +116,7 @@ int main(int argc, char *argv[]) {
             if (socketChannel.connectChannel()) {
                 QString msg = socketChannel.receiveMessage();
                 qDebug() << "Messaggio ricevuto dal SocketChannel:" << msg;
-                // Implementa qui il ciclo di lettura se necessario.
+                // Implementa il ciclo di lettura
             }
         }
         else {

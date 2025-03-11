@@ -24,6 +24,7 @@ SOURCES += main.cpp \
            HDMParser.cpp \
            HDTParser.cpp \
            NMEAParser.cpp \
+           ParserWorker.cpp \
            RawDataDialog.cpp \
            StandaloneGPSHandler.cpp \
            PluginGPSHandler.cpp \
@@ -50,13 +51,15 @@ HEADERS += GPSReceiverConfig.h \
            HDTParser.h \
            INMEASentenceParser.h \
            NMEAParser.h \
+           ParserWorker.h \
            RawDataDialog.h \
            IGPSHandler.h \
            StandaloneGPSHandler.h \
            PluginGPSHandler.h \
            GPSHandlerFactory.h \
            SocketChannel.h \
-           CommunicationChannel.h
+           CommunicationChannel.h \
+           ThreadSafeQueue.h
 
 DISTFILES += \
     GPSReader Project Documentation.docx

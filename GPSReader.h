@@ -5,6 +5,8 @@
 #include <QByteArray>
 #include <QSerialPort>
 #include "NMEAParser.h"
+#include "ThreadSafeQueue.h"
+
 
 /**
  * @brief Structure representing a GPS coordinate.
@@ -44,11 +46,17 @@ public:
      */
     void stop();   // Ferma la lettura, chiude la porta
 
+    /**
+     * @brief Returns the pointer to the thread-safe sentence queue.
+     * @return Pointer to the ThreadSafeQueue.
+     */
+    ThreadSafeQueue* sentenceQueue() const { return m_sentenceQueue; }
+
 signals:
     /**
      * @brief Emitted when a valid coordinate is extracted (from a GPRMC sentence).
      */
-    void newCoordinate(const Coordinate &coord);
+    void newCoordinate(const Coordinate &coord, const QString &messageType);
     /**
      * @brief Emitted when a raw NMEA sentence is received.
      */
@@ -96,6 +104,8 @@ private:
     bool m_paused;          ///< Flag indicating whether reception is paused.
     int m_blockCounter;     ///< Counter for received data blocks.
     Coordinate m_lastCoordinate; ///< Stored coordinate
+    ThreadSafeQueue *m_sentenceQueue;
+
 
 };
 

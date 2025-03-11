@@ -14,7 +14,7 @@ public:
     void stop();
 
 signals:
-    void newCoordinate(const Coordinate &coord);
+    void newCoordinate(const Coordinate &coord, const QString &messageType);
 
 private:
     void readLoop();

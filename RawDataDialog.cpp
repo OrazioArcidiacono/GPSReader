@@ -147,12 +147,13 @@ void RawDataDialog::addRawLogEntry(int blockId, const QString &timestamp, const 
         m_rawTable->scrollToBottom();
 }
 
-void RawDataDialog::updateProcessedData(const Coordinate &coord) {
-    QString text = QString("Lat: %1, Lon: %2")
+void RawDataDialog::updateProcessedData(const Coordinate &coord, const QString &messageType) {
+    QString text = QString("Message: %1 - Lat: %2, Lon: %3")
+                       .arg(messageType)
                        .arg(coord.latitude, 0, 'f', 6)
                        .arg(coord.longitude, 0, 'f', 6);
     m_processedTextEdit->append(text);
-    qDebug() << Q_FUNC_INFO << "Dati elaborati aggiornati:" << text;
+    qDebug() << Q_FUNC_INFO << "Processed data updated:" << text;
 }
 
 void RawDataDialog::updateStatus(const QString &status) {

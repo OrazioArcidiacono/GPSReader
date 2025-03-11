@@ -1,5 +1,4 @@
 #include "GPSReader.h"
-#include "NMEAParser.h"
 #include <QDebug>
 #include <QThread>
 
@@ -9,6 +8,8 @@ GPSReader::GPSReader(const QString &portName, int baudRate, QObject *parent)
     , m_paused(false)
     , m_blockCounter(0)
     , m_lastCoordinate({ 0.0, 0.0 })
+    , m_sentenceQueue(new ThreadSafeQueue())
+
 {
     m_serial->setPortName(portName);
     m_serial->setBaudRate(baudRate);
@@ -77,14 +78,12 @@ void GPSReader::readData() {
 
     while (true) {
         int idx = m_buffer.indexOf("\r\n");
-        if (idx < 0) {
+        if (idx < 0)
             idx = m_buffer.indexOf('\n');
-        }
         if (idx < 0)
             break;
-
         QByteArray line = m_buffer.left(idx);
-        m_buffer.remove(0, idx + 2);
+        m_buffer.remove(0, idx + 2); // Remove CRLF.
         line = line.trimmed();
         if (line.isEmpty())
             continue;
@@ -92,30 +91,8 @@ void GPSReader::readData() {
         if (line.startsWith('$')) {
             QString rawSentence = QString::fromLatin1(line);
             emit rawDataReceived(rawSentence, m_blockCounter);
-
-            NMEAParser::ParsedData parsed = NMEAParser::parse(rawSentence);
-            emit parsedDataReceived(parsed);
-
-            // Controlla se la frase contiene coordinate (es. GPRMC, GPGGA o GPGLL)
-            if (parsed.valid &&
-                (parsed.sentenceType == "GPRMC" ||
-                 parsed.sentenceType == "GPGGA" ||
-                 parsed.sentenceType == "GPGLL")) {
-                if (parsed.fields.contains("latitude") && parsed.fields.contains("longitude")) {
-                    double newLat = parsed.fields.value("latitude").toDouble();
-                    double newLon = parsed.fields.value("longitude").toDouble();
-                    Coordinate newCoord { newLat, newLon };
-
-                    // Verifica se le coordinate sono diverse dall'ultimo valore emesso
-                    // (definiamo una tolleranza per evitare aggiornamenti troppo frequenti)
-                    const double tolerance = 1e-6;
-                    if (fabs(newCoord.latitude - m_lastCoordinate.latitude) > tolerance ||
-                        fabs(newCoord.longitude - m_lastCoordinate.longitude) > tolerance) {
-                        m_lastCoordinate = newCoord;
-                        emit newCoordinate(newCoord);
-                    }
-                }
-            }
+            // Enqueue the raw sentence for processing by the ParserWorker.
+            m_sentenceQueue->enqueue(rawSentence);
         } else {
             qDebug() << "Non-NMEA line:" << line;
         }
