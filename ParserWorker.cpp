@@ -4,7 +4,7 @@
 #include <cmath>
 
 ParserWorker::ParserWorker(ThreadSafeQueue *queue, QObject *parent)
-    : QObject(parent), m_queue(queue), m_stop(false)
+    : QObject(parent), m_queue(queue), m_stop(false), m_lastCoordinate({0.0, 0.0})
 {
 }
 
@@ -30,10 +30,18 @@ void ParserWorker::process() {
              parsed.sentenceType == "GPGLL"))
         {
             if (parsed.fields.contains("latitude") && parsed.fields.contains("longitude")) {
-                Coordinate coord { parsed.fields.value("latitude").toDouble(),
-                                 parsed.fields.value("longitude").toDouble() };
-                // Emit the new coordinate along with the message type
-                emit newCoordinate(coord, parsed.sentenceType);
+                double newLat = parsed.fields.value("latitude").toDouble();
+                double newLon = parsed.fields.value("longitude").toDouble();
+                Coordinate newCoord { newLat, newLon };
+
+                // Define a tolerance to filter out minor changes
+                const double tolerance = 1e-6;
+                if (fabs(newCoord.latitude - m_lastCoordinate.latitude) > tolerance ||
+                    fabs(newCoord.longitude - m_lastCoordinate.longitude) > tolerance)
+                {
+                    m_lastCoordinate = newCoord;
+                    emit newCoordinate(newCoord, parsed.sentenceType);
+                }
             }
         }
     }

@@ -37,7 +37,7 @@ public slots:
      * @brief Updates the processed data area with a coordinate.
      * @param coord The processed GPS coordinate.
      */
-    void updateProcessedData(const Coordinate &coord);
+    void updateProcessedData(const Coordinate &coord,const QString &messageType);
     /**
      * @brief Updates the status area with a message.
      * @param status The status message.
@@ -49,6 +49,8 @@ public slots:
      */
     void updateParsedData(const NMEAParser::ParsedData &parsedData);
 
+
+    void updateFifoOutput(const QString &data);
 signals:
 
     void pauseRequested();
@@ -80,6 +82,7 @@ private:
     QPushButton *m_pauseButton;      ///< Pause button.
     QPushButton *m_resumeButton;     ///< Resume button.
     QPushButton *m_restartButton;    ///< Restart port button.
+    QTextEdit *m_fifoOutputTextEdit;
 
     bool m_autoScrollEnabled;      // Flag to indicate if auto-scrolling is enabled
     QTimer *m_autoScrollTimer;     // Timer per ripristinare l'auto-scroll dopo 10 secondi

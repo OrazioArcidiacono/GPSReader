@@ -6,6 +6,7 @@ TARGET = GPSReceiver
 TEMPLATE = app
 
 SOURCES += main.cpp \
+           DummyFifoReader.cpp \
            GPGGAParser.cpp \
            GPGLLParser.cpp \
            GPGSAParser.cpp \
@@ -32,6 +33,8 @@ SOURCES += main.cpp \
            SocketChannel.cpp
 
 HEADERS += GPSReceiverConfig.h \
+           DummyFifoReader.h \
+           DummyFifoReaderThread.h \
            GPGGAParser.h \
            GPGLLParser.h \
            GPGSAParser.h \

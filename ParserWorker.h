@@ -47,6 +47,8 @@ signals:
 private:
     ThreadSafeQueue *m_queue;
     bool m_stop;
+    Coordinate m_lastCoordinate; // Last emitted coordinate for filtering
+
 };
 
 #endif // PARSERWORKER_H

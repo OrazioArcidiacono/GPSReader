@@ -73,6 +73,11 @@ RawDataDialog::RawDataDialog(QWidget *parent)
     m_statusTextEdit->setPlaceholderText("Stato...");
     // Setup control buttons.
 
+    // New FIFO output text area.
+    m_fifoOutputTextEdit = new QTextEdit(this);
+    m_fifoOutputTextEdit->setReadOnly(true);
+    m_fifoOutputTextEdit->setPlaceholderText("FIFO Output...");
+
     m_pauseButton = new QPushButton("Pausa", this);
     m_resumeButton = new QPushButton("Riprendi", this);
     m_restartButton = new QPushButton("Riavvia Porta", this);
@@ -96,6 +101,7 @@ RawDataDialog::RawDataDialog(QWidget *parent)
     QWidget *bottomWidget = new QWidget(this);
     QVBoxLayout *bottomLayout = new QVBoxLayout(bottomWidget);
     bottomLayout->addWidget(m_processedTextEdit);
+    bottomLayout->addWidget(m_fifoOutputTextEdit);
     bottomLayout->addWidget(m_statusTextEdit);
     bottomWidget->setLayout(bottomLayout);
 
@@ -118,6 +124,7 @@ void RawDataDialog::setupLegend() {
         "<b>Dati Grezzi:</b> La tabella a sinistra mostra, per ogni frase NMEA, il Block ID, il Timestamp, la frase completa e il Sentence Type.<br>"
         "<b>Dettaglio Campi Parsati:</b> Cliccando una riga, la tabella a destra mostrerà i campi (Key/Value) ottenuti dal parsing completo della frase.<br>"
         "<b>Dati Elaborati:</b> L'area a destra mostra le coordinate elaborate (in formato decimale).<br>"
+        "<b>FIFO Output:</b> Displays the exact string written to the FIFO in FIFO WRITE mode.<br>"
         "<b>Stato:</b> Mostra i messaggi sullo stato corrente del modulo GPS.<br>"
         "<b>Controlli:</b> I pulsanti in basso permettono di mettere in pausa, riprendere o riavviare la porta seriale."
         );
@@ -164,6 +171,12 @@ void RawDataDialog::updateStatus(const QString &status) {
 void RawDataDialog::updateParsedData(const NMEAParser::ParsedData &parsedData) {
     // Questo slot non viene chiamato automaticamente per non sovrascrivere il dettaglio.
     Q_UNUSED(parsedData)
+}
+
+void RawDataDialog::updateFifoOutput(const QString &data) {
+    // Append the string written to FIFO to the dedicated text area.
+    m_fifoOutputTextEdit->append("FIFO Output: " + data);
+    qDebug() << Q_FUNC_INFO << "FIFO output updated:" << data;
 }
 
 void RawDataDialog::onRawTableRowSelected(int currentRow, int currentColumn, int previousRow, int previousColumn) {
