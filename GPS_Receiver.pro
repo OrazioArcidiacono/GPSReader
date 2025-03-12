@@ -7,6 +7,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
            DummyFifoReader.cpp \
+           FifoReadMode.cpp \
+           FifoWriteMode.cpp \
            GPGGAParser.cpp \
            GPGLLParser.cpp \
            GPGSAParser.cpp \
@@ -30,11 +32,14 @@ SOURCES += main.cpp \
            StandaloneGPSHandler.cpp \
            PluginGPSHandler.cpp \
            GPSHandlerFactory.cpp \
-           SocketChannel.cpp
+           SocketChannel.cpp \
+           StandaloneMode.cpp
 
 HEADERS += GPSReceiverConfig.h \
            DummyFifoReader.h \
            DummyFifoReaderThread.h \
+           FifoReadMode.h \
+           FifoWriteMode.h \
            GPGGAParser.h \
            GPGLLParser.h \
            GPGSAParser.h \
@@ -57,11 +62,14 @@ HEADERS += GPSReceiverConfig.h \
            ParserWorker.h \
            RawDataDialog.h \
            IGPSHandler.h \
+           ReceiverMode.h \
+           ReceiverModeFactory.h \
            StandaloneGPSHandler.h \
            PluginGPSHandler.h \
            GPSHandlerFactory.h \
            SocketChannel.h \
            CommunicationChannel.h \
+           StandaloneMode.h \
            ThreadSafeQueue.h
 
 DISTFILES += \
